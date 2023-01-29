@@ -5,5 +5,7 @@ import net.minecraft.client.particle.ParticleTextureSheet;
 
 public class ParticleModify {
     public boolean CHANGE_COLOR = false;
+    public boolean BLOCK_RENDER = false;
     public ParticleTextureSheet RENDER_TYPE = ParticleTextureSheet.NO_RENDER;
+    public int LIGHT = -1;
 }

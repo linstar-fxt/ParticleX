@@ -36,6 +36,10 @@ public class CustomParticlePacket {
     boolean force;
     public int age;
 
+    public float alpha;
+
+    public float scale;
+
     public CustomParticlePacket(PacketByteBuf buf){
         particle_id = buf.readInt();
 
@@ -58,9 +62,11 @@ public class CustomParticlePacket {
         count = buf.readInt();
         force = buf.readBoolean();
         age = buf.readInt();
+        alpha = buf.readFloat();
+        scale = buf.readFloat();
     }
 
-    public CustomParticlePacket(ParticleEffect effect, float red, float green, float blue, float target_red, float target_green, float target_blue, double x, double y, double z, double dx, double dy, double dz, float speed, int count, boolean force, int age){
+    public CustomParticlePacket(ParticleEffect effect, float red, float green, float blue, float target_red, float target_green, float target_blue, double x, double y, double z, double dx, double dy, double dz, float speed, int count, boolean force, int age, float alpha, float scale){
         particle_id = Registry.PARTICLE_TYPE.getRawId(effect.getType());
 
         this.red = red;
@@ -84,6 +90,8 @@ public class CustomParticlePacket {
         this.force = force;
 
         this.age = age;
+        this.alpha = alpha;
+        this.scale = scale;
     }
 
     public void send(ServerPlayerEntity player, Identifier identifier){
@@ -111,6 +119,8 @@ public class CustomParticlePacket {
         buf.writeInt(count);
         buf.writeBoolean(force);
         buf.writeInt(age);
+        buf.writeFloat(alpha);
+        buf.writeFloat(scale);
 
         ServerPlayNetworking.send(player, identifier, buf);
     }

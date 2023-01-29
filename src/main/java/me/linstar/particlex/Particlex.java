@@ -19,7 +19,8 @@ public class Particlex implements ModInitializer {
 
     //所有自定义粒子在此定义
     public void register_particle(){
-        ParticleBuilder.build("basic").render_type(ParticleTextureSheet.PARTICLE_SHEET_LIT).change_color(true).register();
-        ParticleBuilder.build("hello").render_type(ParticleTextureSheet.PARTICLE_SHEET_OPAQUE).change_color(false).register();
+        ParticleBuilder.build("basic").render_type(ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT).change_color(true).register();
+        ParticleBuilder.build("hello").render_type(ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT).change_color(false).light(15).register();
+        ParticleBuilder.build("block").render_type(ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT).change_color(true).block_render(true).register();
     }
 }

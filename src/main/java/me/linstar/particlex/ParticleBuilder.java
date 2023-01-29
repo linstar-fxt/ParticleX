@@ -28,6 +28,16 @@ public class ParticleBuilder {
         return this;
     }
 
+    public ParticleBuilder block_render(boolean able){
+        modify.BLOCK_RENDER = able;
+        return this;
+    }
+
+    public ParticleBuilder light(int light){
+        modify.LIGHT = light - 1;
+        return this;
+    }
+
     public void register(){
         CustomParticleManager.getINSTANCE().add(register_name, modify);
     }

@@ -6,9 +6,19 @@ import me.linstar.particlex.until.ParticleModify;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Quaternion;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BasicParticle extends SpriteBillboardParticle {
 
@@ -43,13 +53,13 @@ public class BasicParticle extends SpriteBillboardParticle {
         this.target_red = packet.target_red;
         this.target_green = packet.target_green;
         this.target_blue = packet.target_blue;
+        this.velocityMultiplier = packet.speed;
 
-        System.out.println("color" + target_red + " " + target_green + " " + target_blue);
-
+        this.alpha = packet.alpha;
         this.maxAge = packet.age;
-
-        System.out.println(Registry.PARTICLE_TYPE.getId(Registry.PARTICLE_TYPE.get(packet.particle_id)).getPath());
         this.modify = manager.get_modify(Registry.PARTICLE_TYPE.getId(Registry.PARTICLE_TYPE.get(packet.particle_id)).getPath());
+        this.scale(packet.scale);
+
         this.provider = spriteProvider;
         setSpriteForAge(spriteProvider);
     }
@@ -70,7 +80,7 @@ public class BasicParticle extends SpriteBillboardParticle {
     public void animate(){
 
         if (this.age > this.maxAge / 2) {
-            this.setAlpha(1.0F - ((float)this.age - (float)(this.maxAge / 2)) / (float)this.maxAge);
+            //this.setAlpha(1.0F - ((float)this.age - (float)(this.maxAge / 2)) / (float)this.maxAge);
             if (modify.CHANGE_COLOR) {
                 this.red += (this.target_red - this.red) * 0.2F;
                 this.green += (this.target_green - this.green) * 0.2F;
@@ -89,6 +99,88 @@ public class BasicParticle extends SpriteBillboardParticle {
         this.y += dy;
         this.z += dz;
 
+    }
+
+    @Override
+    public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
+        if (!modify.BLOCK_RENDER){
+            super.buildGeometry(vertexConsumer, camera, tickDelta);
+            return;
+        }
+
+        Vec3d vec3d = camera.getPos();
+        float f = (float)(MathHelper.lerp(tickDelta, this.prevPosX, this.x) - vec3d.getX());
+        float g = (float)(MathHelper.lerp(tickDelta, this.prevPosY, this.y) - vec3d.getY());
+        float h = (float)(MathHelper.lerp(tickDelta, this.prevPosZ, this.z) - vec3d.getZ());
+
+        Vec3f[] front = new Vec3f[]{
+                new Vec3f(-1.0F, -1.0F, -1.0F), //前
+                new Vec3f(-1.0F, 1.0F, -1.0F),
+                new Vec3f(1.0F, 1.0F, -1.0F),
+                new Vec3f(1.0F, -1.0F, -1.0F),
+        };
+        Vec3f[] back = new Vec3f[]{
+                new Vec3f(-1.0F, 1.0F, 1.0F), //后
+                new Vec3f(-1.0F, -1.0F, 1.0F),
+                new Vec3f(1.0F, -1.0F, 1.0F),
+                new Vec3f(1.0F, 1.0F, 1.0F),
+        };
+
+        Vec3f[] left = new Vec3f[]{
+                new Vec3f(-1.0F, -1.0F, 1.0F), //左
+                new Vec3f(-1.0F, 1.0F, 1.0F),
+                new Vec3f(-1.0F, 1.0F, -1.0F),
+                new Vec3f(-1.0F, -1.0F, -1.0F),
+        };
+        Vec3f[] right = new Vec3f[]{
+                new Vec3f(1.0F, -1.0F, -1.0F), //右
+                new Vec3f(1.0F, 1.0F, -1.0F),
+                new Vec3f(1.0F, 1.0F, 1.0F),
+                new Vec3f(1.0F, -1.0F, 1.0F),
+        };
+        Vec3f[] button = new Vec3f[]{
+                new Vec3f(-1.0F, -1.0F, 1.0F), //下
+                new Vec3f(-1.0F, -1.0F, -1.0F),
+                new Vec3f(1.0F, -1.0F, -1.0F),
+                new Vec3f(1.0F, -1.0F, 1.0F),
+        };
+        Vec3f[] top = new Vec3f[]{
+                new Vec3f(-1.0F, 1.0F, -1.0F), //上
+                new Vec3f(-1.0F, 1.0F, 1.0F),
+                new Vec3f(1.0F, 1.0F, 1.0F),
+                new Vec3f(1.0F, 1.0F, -1.0F),
+        };
+
+        List<Vec3f[]> vec3fs = new ArrayList<>();
+        vec3fs.add(front);
+        vec3fs.add(back);
+        vec3fs.add(left);
+        vec3fs.add(right);
+        vec3fs.add(top);
+        vec3fs.add(button);
+
+        float j = this.getSize(tickDelta);
+        float l = this.getMinU();
+        float m = this.getMaxU();
+        float n = this.getMinV();
+        float o = this.getMaxV();
+        int p = this.getBrightness(tickDelta);
+
+        for (Vec3f[] face: vec3fs){
+            for (Vec3f vec3f: face){
+                vec3f.scale(j);
+                vec3f.add(f, g, h);
+            }
+            vertexConsumer.vertex((double)face[0].getX(), (double)face[0].getY(), (double)face[0].getZ()).texture(m, o).color(this.red, this.green, this.blue, this.alpha).light(p).next();
+            vertexConsumer.vertex((double)face[1].getX(), (double)face[1].getY(), (double)face[1].getZ()).texture(m, n).color(this.red, this.green, this.blue, this.alpha).light(p).next();
+            vertexConsumer.vertex((double)face[2].getX(), (double)face[2].getY(), (double)face[2].getZ()).texture(l, n).color(this.red, this.green, this.blue, this.alpha).light(p).next();
+            vertexConsumer.vertex((double)face[3].getX(), (double)face[3].getY(), (double)face[3].getZ()).texture(l, o).color(this.red, this.green, this.blue, this.alpha).light(p).next();
+        }
+    }
+
+    @Override
+    protected int getBrightness(float tint) {
+        return modify.LIGHT == -1 ? super.getBrightness(tint) : 15728880 - 16 * (16 - modify.LIGHT);
     }
 
     @Override
