@@ -58,7 +58,8 @@ public class BasicParticle extends SpriteBillboardParticle {
         this.alpha = packet.alpha;
         this.maxAge = packet.age;
         this.modify = manager.get_modify(Registry.PARTICLE_TYPE.getId(Registry.PARTICLE_TYPE.get(packet.particle_id)).getPath());
-        this.scale(packet.scale);
+        //this.scale(packet.scale);
+        this.scale = packet.scale;
 
         this.provider = spriteProvider;
         setSpriteForAge(spriteProvider);

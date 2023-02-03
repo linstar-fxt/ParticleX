@@ -1,5 +1,7 @@
 package me.linstar.particlex;
 
+import me.linstar.particlex.command.ParticleCleanCommand;
+import me.linstar.particlex.command.ParticleLimitCommand;
 import me.linstar.particlex.command.ParticleXCommand;
 import me.linstar.particlex.until.CustomParticleManager;
 import net.fabricmc.api.ModInitializer;
@@ -15,6 +17,7 @@ public class Particlex implements ModInitializer {
         register_particle();
         CustomParticleManager.getINSTANCE().server_register();  //服务端注册粒子
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> ParticleXCommand.register(dispatcher))); //粒子命令注册
+        CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> ParticleCleanCommand.register(dispatcher)));
     }
 
     //所有自定义粒子在此定义
