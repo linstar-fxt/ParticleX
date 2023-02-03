@@ -32,21 +32,22 @@ public class ParticleXCommand {
                                                 CommandManager.argument("speed", FloatArgumentType.floatArg(0F)).then(
                                                         CommandManager.argument("count", IntegerArgumentType.integer(0)).then(
                                                                 CommandManager.literal("force").then(
-                                                                        CommandManager.argument("viewers", EntityArgumentType.players()).then(
-                                                                                CommandManager.argument("time", IntegerArgumentType.integer(0)).then(
-                                                                                        CommandManager.argument("alpha", FloatArgumentType.floatArg()).then(
-                                                                                                CommandManager.argument("scale", FloatArgumentType.floatArg())
+                                                                        CommandManager.argument("time", IntegerArgumentType.integer(0)).then(
+                                                                                CommandManager.argument("alpha", FloatArgumentType.floatArg()).then(
+                                                                                        CommandManager.argument("scale", FloatArgumentType.floatArg()).then(
+                                                                                                CommandManager.argument("viewers", EntityArgumentType.players())
                                                                                                     .executes(context -> execute(context.getSource(), ParticleEffectArgumentType.getParticle(context, "name"), new Vec3f(Vec3ArgumentType.getVec3(context, "color")), Vec3f.ZERO, Vec3ArgumentType.getVec3(context, "pos"), Vec3ArgumentType.getVec3(context, "delta"), FloatArgumentType.getFloat(context, "speed"), IntegerArgumentType.getInteger(context, "count"), true, EntityArgumentType.getPlayers(context, "viewers"), IntegerArgumentType.getInteger(context, "time"), FloatArgumentType.getFloat(context, "alpha"), FloatArgumentType.getFloat(context, "scale")))
                                                                                         )
                                                                                 )
                                                                         )
+
                                                                 )
                                                         ).then(
                                                                 CommandManager.literal("normal").then(
-                                                                        CommandManager.argument("viewers", EntityArgumentType.players()).then(
-                                                                                CommandManager.argument("time", IntegerArgumentType.integer(0)).then(
-                                                                                        CommandManager.argument("alpha", FloatArgumentType.floatArg()).then(
-                                                                                            CommandManager.argument("scale", FloatArgumentType.floatArg())
+                                                                        CommandManager.argument("time", IntegerArgumentType.integer(0)).then(
+                                                                                CommandManager.argument("alpha", FloatArgumentType.floatArg()).then(
+                                                                                    CommandManager.argument("scale", FloatArgumentType.floatArg()).then(
+                                                                                            CommandManager.argument("viewers", EntityArgumentType.players())
                                                                                                 .executes(context -> execute(context.getSource(), ParticleEffectArgumentType.getParticle(context, "name"), new Vec3f(Vec3ArgumentType.getVec3(context, "color")), Vec3f.ZERO, Vec3ArgumentType.getVec3(context, "pos"), Vec3ArgumentType.getVec3(context, "delta"), FloatArgumentType.getFloat(context, "speed"), IntegerArgumentType.getInteger(context, "count"), false, EntityArgumentType.getPlayers(context, "viewers"), IntegerArgumentType.getInteger(context, "time"), FloatArgumentType.getFloat(context, "alpha"), FloatArgumentType.getFloat(context, "scale")))
                                                                                         )
                                                                                 )
@@ -63,25 +64,27 @@ public class ParticleXCommand {
                                                         CommandManager.argument("speed", FloatArgumentType.floatArg(0F)).then(
                                                                 CommandManager.argument("count", IntegerArgumentType.integer(0)).then(
                                                                         CommandManager.literal("force").then(
-                                                                                CommandManager.argument("viewers", EntityArgumentType.players()).then(
-                                                                                        CommandManager.argument("time", IntegerArgumentType.integer(0)).then(
-                                                                                                CommandManager.argument("alpha", FloatArgumentType.floatArg()).then(
-                                                                                                        CommandManager.argument("scale", FloatArgumentType.floatArg())
+                                                                                CommandManager.argument("time", IntegerArgumentType.integer(0)).then(
+                                                                                        CommandManager.argument("alpha", FloatArgumentType.floatArg()).then(
+                                                                                                CommandManager.argument("scale", FloatArgumentType.floatArg()).then(
+                                                                                                        CommandManager.argument("viewers", EntityArgumentType.players())
                                                                                                             .executes(context -> execute(context.getSource(), ParticleEffectArgumentType.getParticle(context, "name"), new Vec3f(Vec3ArgumentType.getVec3(context, "color")), new Vec3f(Vec3ArgumentType.getVec3(context, "target")), Vec3ArgumentType.getVec3(context, "pos"), Vec3ArgumentType.getVec3(context, "delta"), FloatArgumentType.getFloat(context, "speed"), IntegerArgumentType.getInteger(context, "count"), true, EntityArgumentType.getPlayers(context, "viewers"), IntegerArgumentType.getInteger(context, "time"), FloatArgumentType.getFloat(context, "alpha"), FloatArgumentType.getFloat(context, "scale")))
-                                                                                                )
+                                                                                            )
                                                                                         )
                                                                                 )
+
                                                                         )
                                                                 ).then(
                                                                         CommandManager.literal("normal").then(
-                                                                                CommandManager.argument("viewers", EntityArgumentType.players()).then(
-                                                                                        CommandManager.argument("time", IntegerArgumentType.integer(0)).then(
-                                                                                                CommandManager.argument("alpha", FloatArgumentType.floatArg()).then(
-                                                                                                        CommandManager.argument("scale", FloatArgumentType.floatArg())
+                                                                                CommandManager.argument("time", IntegerArgumentType.integer(0)).then(
+                                                                                        CommandManager.argument("alpha", FloatArgumentType.floatArg()).then(
+                                                                                                CommandManager.argument("scale", FloatArgumentType.floatArg()).then(
+                                                                                                        CommandManager.argument("viewers", EntityArgumentType.players())
                                                                                                             .executes(context -> execute(context.getSource(), ParticleEffectArgumentType.getParticle(context, "name"), new Vec3f(Vec3ArgumentType.getVec3(context, "color")), new Vec3f(Vec3ArgumentType.getVec3(context, "target")), Vec3ArgumentType.getVec3(context, "pos"), Vec3ArgumentType.getVec3(context, "delta"), FloatArgumentType.getFloat(context, "speed"), IntegerArgumentType.getInteger(context, "count"), false, EntityArgumentType.getPlayers(context, "viewers"), IntegerArgumentType.getInteger(context, "time"), FloatArgumentType.getFloat(context, "alpha"), FloatArgumentType.getFloat(context, "scale")))
                                                                                                 )
                                                                                         )
                                                                                 )
+
                                                                         )
                                                                 )
                                                         )
