@@ -6,12 +6,10 @@ import me.linstar.particlex.until.ParticleModify;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
@@ -19,18 +17,28 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class BasicParticle extends SpriteBillboardParticle {
 
     SpriteProvider provider;
 
     int animate = 0;
+    int delay;
+    int color_delay;
 
     float target_red;
     float target_green;
     float target_blue;
 
+
+    boolean hide;
+
     ParticleModify modify;
+    ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
 
     protected BasicParticle(ClientWorld clientWorld, double x, double y, double z, double dx, double dy, double dz, SpriteProvider spriteProvider, BasicParticleEffect effect) {
         super(clientWorld, x, y , z);
@@ -56,31 +64,63 @@ public class BasicParticle extends SpriteBillboardParticle {
         this.velocityMultiplier = packet.speed;
 
         this.alpha = packet.alpha;
-        this.maxAge = packet.age;
+
         this.modify = manager.get_modify(Registry.PARTICLE_TYPE.getId(Registry.PARTICLE_TYPE.get(packet.particle_id)).getPath());
         //this.scale(packet.scale);
         this.scale = packet.scale;
 
+        this.delay = packet.delay;
+
+        this.color_delay = packet.color;
+
         this.provider = spriteProvider;
+
+        this.hide = delay != 0;
+
+        TimerTask showTask = new TimerTask() {
+            @Override
+            public void run() {
+                hide = false;
+            }
+        };
+
+        TimerTask deadTask = new TimerTask() {
+            @Override
+            public void run() {
+                dead = true;
+            }
+        };
+
+        if (hide) {
+            this.executor.schedule(showTask, delay * 10L, TimeUnit.MILLISECONDS);
+        }
+
+        this.executor.schedule(deadTask, (packet.age + delay) * 10L, TimeUnit.MILLISECONDS);
+
         setSpriteForAge(spriteProvider);
     }
 
     @Override
     public void tick() {
+        if (hide || this.dead){
+            return;
+        }
+
         this.prevPosX = this.x;                //坐标更新
         this.prevPosY = this.y;
         this.prevPosZ = this.z;
-        if (this.age++ >= this.maxAge) {       //生命判断
-            this.markDead();
-        } else {
-            animate();                         //自定义动画更新
+
+        animate();                         //自定义动画更新
+
+        if (modify.BLOCK_RENDER){
+            return;
         }
         this.setSpriteForAge(provider);  //纹理动画更新
     }
 
     public void animate(){
 
-        if (this.age > this.maxAge / 2) {
+        if (this.age > this.color_delay) {
             //this.setAlpha(1.0F - ((float)this.age - (float)(this.maxAge / 2)) / (float)this.maxAge);
             if (modify.CHANGE_COLOR) {
                 this.red += (this.target_red - this.red) * 0.2F;
@@ -104,6 +144,11 @@ public class BasicParticle extends SpriteBillboardParticle {
 
     @Override
     public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
+
+        if (this.hide || this.dead){
+            return;
+        }
+
         if (!modify.BLOCK_RENDER){
             super.buildGeometry(vertexConsumer, camera, tickDelta);
             return;
@@ -119,37 +164,69 @@ public class BasicParticle extends SpriteBillboardParticle {
                 new Vec3f(-1.0F, 1.0F, -1.0F),
                 new Vec3f(1.0F, 1.0F, -1.0F),
                 new Vec3f(1.0F, -1.0F, -1.0F),
+
+                new Vec3f(-1.0F, 1.0F, -1.0F),
+                new Vec3f(-1.0F, -1.0F, -1.0F),
+                new Vec3f(1.0F, -1.0F, -1.0F),
+                new Vec3f(1.0F, 1.0F, -1.0F),
+
         };
         Vec3f[] back = new Vec3f[]{
                 new Vec3f(-1.0F, 1.0F, 1.0F), //后
                 new Vec3f(-1.0F, -1.0F, 1.0F),
                 new Vec3f(1.0F, -1.0F, 1.0F),
                 new Vec3f(1.0F, 1.0F, 1.0F),
+
+                new Vec3f(-1.0F, -1.0F, 1.0F), //前
+                new Vec3f(-1.0F, 1.0F, 1.0F),
+                new Vec3f(1.0F, 1.0F, 1.0F),
+                new Vec3f(1.0F, -1.0F, 1.0F),
         };
 
-        Vec3f[] left = new Vec3f[]{
+        Vec3f[] right = new Vec3f[]{
                 new Vec3f(-1.0F, -1.0F, 1.0F), //左
                 new Vec3f(-1.0F, 1.0F, 1.0F),
                 new Vec3f(-1.0F, 1.0F, -1.0F),
                 new Vec3f(-1.0F, -1.0F, -1.0F),
+
+                new Vec3f(-1.0F, -1.0F, -1.0F), //右
+                new Vec3f(-1.0F, 1.0F, -1.0F),
+                new Vec3f(-1.0F, 1.0F, 1.0F),
+                new Vec3f(-1.0F, -1.0F, 1.0F),
         };
-        Vec3f[] right = new Vec3f[]{
+
+        Vec3f[] left = new Vec3f[]{
                 new Vec3f(1.0F, -1.0F, -1.0F), //右
                 new Vec3f(1.0F, 1.0F, -1.0F),
                 new Vec3f(1.0F, 1.0F, 1.0F),
                 new Vec3f(1.0F, -1.0F, 1.0F),
+
+                new Vec3f(1.0F, -1.0F, 1.0F), //左
+                new Vec3f(1.0F, 1.0F, 1.0F),
+                new Vec3f(1.0F, 1.0F, -1.0F),
+                new Vec3f(1.0F, -1.0F, -1.0F),
         };
         Vec3f[] button = new Vec3f[]{
                 new Vec3f(-1.0F, -1.0F, 1.0F), //下
                 new Vec3f(-1.0F, -1.0F, -1.0F),
                 new Vec3f(1.0F, -1.0F, -1.0F),
                 new Vec3f(1.0F, -1.0F, 1.0F),
+
+                new Vec3f(-1.0F, -1.0F, -1.0F), //上
+                new Vec3f(-1.0F, -1.0F, 1.0F),
+                new Vec3f(1.0F, -1.0F, 1.0F),
+                new Vec3f(1.0F, -1.0F, -1.0F),
         };
         Vec3f[] top = new Vec3f[]{
                 new Vec3f(-1.0F, 1.0F, -1.0F), //上
                 new Vec3f(-1.0F, 1.0F, 1.0F),
                 new Vec3f(1.0F, 1.0F, 1.0F),
                 new Vec3f(1.0F, 1.0F, -1.0F),
+
+                new Vec3f(-1.0F, 1.0F, 1.0F), //下
+                new Vec3f(-1.0F, 1.0F, -1.0F),
+                new Vec3f(1.0F, 1.0F, -1.0F),
+                new Vec3f(1.0F, 1.0F, 1.0F),
         };
 
         List<Vec3f[]> vec3fs = new ArrayList<>();
@@ -161,21 +238,28 @@ public class BasicParticle extends SpriteBillboardParticle {
         vec3fs.add(button);
 
         float j = this.getSize(tickDelta);
-        float l = this.getMinU();
-        float m = this.getMaxU();
-        float n = this.getMinV();
-        float o = this.getMaxV();
         int p = this.getBrightness(tickDelta);
 
+        int i = 0;
         for (Vec3f[] face: vec3fs){
             for (Vec3f vec3f: face){
                 vec3f.scale(j);
                 vec3f.add(f, g, h);
             }
+            this.setSprite(provider.getSprite(i, 5));
+            float l = this.getMinU();
+            float m = this.getMaxU();
+            float n = this.getMinV();
+            float o = this.getMaxV();
+            i++;
             vertexConsumer.vertex((double)face[0].getX(), (double)face[0].getY(), (double)face[0].getZ()).texture(m, o).color(this.red, this.green, this.blue, this.alpha).light(p).next();
             vertexConsumer.vertex((double)face[1].getX(), (double)face[1].getY(), (double)face[1].getZ()).texture(m, n).color(this.red, this.green, this.blue, this.alpha).light(p).next();
             vertexConsumer.vertex((double)face[2].getX(), (double)face[2].getY(), (double)face[2].getZ()).texture(l, n).color(this.red, this.green, this.blue, this.alpha).light(p).next();
             vertexConsumer.vertex((double)face[3].getX(), (double)face[3].getY(), (double)face[3].getZ()).texture(l, o).color(this.red, this.green, this.blue, this.alpha).light(p).next();
+            vertexConsumer.vertex((double)face[4].getX(), (double)face[4].getY(), (double)face[4].getZ()).texture(m, o).color(this.red, this.green, this.blue, this.alpha).light(p).next();
+            vertexConsumer.vertex((double)face[5].getX(), (double)face[5].getY(), (double)face[5].getZ()).texture(m, n).color(this.red, this.green, this.blue, this.alpha).light(p).next();
+            vertexConsumer.vertex((double)face[6].getX(), (double)face[6].getY(), (double)face[6].getZ()).texture(l, n).color(this.red, this.green, this.blue, this.alpha).light(p).next();
+            vertexConsumer.vertex((double)face[7].getX(), (double)face[7].getY(), (double)face[7].getZ()).texture(l, o).color(this.red, this.green, this.blue, this.alpha).light(p).next();
         }
     }
 
@@ -186,6 +270,7 @@ public class BasicParticle extends SpriteBillboardParticle {
 
     @Override
     public ParticleTextureSheet getType() {
+
         return modify.RENDER_TYPE;
     }
 
