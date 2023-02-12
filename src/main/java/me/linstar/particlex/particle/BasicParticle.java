@@ -37,8 +37,9 @@ public class BasicParticle extends SpriteBillboardParticle {
 
     boolean hide;
 
+    int milli_age;
+
     ParticleModify modify;
-    ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
 
     protected BasicParticle(ClientWorld clientWorld, double x, double y, double z, double dx, double dy, double dz, SpriteProvider spriteProvider, BasicParticleEffect effect) {
         super(clientWorld, x, y , z);
@@ -64,7 +65,7 @@ public class BasicParticle extends SpriteBillboardParticle {
         this.velocityMultiplier = packet.speed;
 
         this.alpha = packet.alpha;
-
+        this.maxAge = packet.age;
         this.modify = manager.get_modify(Registry.PARTICLE_TYPE.getId(Registry.PARTICLE_TYPE.get(packet.particle_id)).getPath());
         //this.scale(packet.scale);
         this.scale = packet.scale;
@@ -77,25 +78,6 @@ public class BasicParticle extends SpriteBillboardParticle {
 
         this.hide = delay != 0;
 
-        TimerTask showTask = new TimerTask() {
-            @Override
-            public void run() {
-                hide = false;
-            }
-        };
-
-        TimerTask deadTask = new TimerTask() {
-            @Override
-            public void run() {
-                dead = true;
-            }
-        };
-
-        if (hide) {
-            this.executor.schedule(showTask, delay * 10L, TimeUnit.MILLISECONDS);
-        }
-
-        this.executor.schedule(deadTask, (packet.age + delay) * 10L, TimeUnit.MILLISECONDS);
 
         setSpriteForAge(spriteProvider);
     }
@@ -116,6 +98,19 @@ public class BasicParticle extends SpriteBillboardParticle {
             return;
         }
         this.setSpriteForAge(provider);  //纹理动画更新
+    }
+
+    public void milli_tick(){
+        if (dead){
+            return;
+        }
+        milli_age ++;
+        if (milli_age == delay){
+            hide = false;
+        }
+        if (milli_age == delay + maxAge){
+            dead = true;
+        }
     }
 
     public void animate(){

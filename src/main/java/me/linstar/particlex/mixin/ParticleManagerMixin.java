@@ -1,6 +1,7 @@
 package me.linstar.particlex.mixin;
 
 import com.google.common.collect.EvictingQueue;
+import me.linstar.particlex.particle.BasicParticle;
 import me.linstar.particlex.until.ParticleConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,6 +18,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ParticleManager.class)
@@ -24,6 +30,7 @@ public class ParticleManagerMixin {
     @Shadow
     @Final
     private Map<ParticleTextureSheet, Queue<Particle>> particles;
+
 
     @Inject(method = "tick", at = @At("TAIL"))
     public void tick(CallbackInfo ci){
@@ -37,5 +44,25 @@ public class ParticleManagerMixin {
                 e.printStackTrace(); //debug
             }
         }
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    public void init(CallbackInfo ci){
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                for (Queue<Particle> queue : particles.values()) {
+                    for (Particle particle : queue) {
+                        if (particle instanceof BasicParticle) {
+                            ((BasicParticle) particle).milli_tick();
+                        }
+                    }
+                }
+            }
+        };
+
+        Timer timer = new Timer("ParticleX");
+        timer.schedule(task, 0, 10);
     }
 }
