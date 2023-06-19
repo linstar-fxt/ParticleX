@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "particlex",
+  "version": "${version}",
+  "name": "Particlex",
+  "description": "",
+  "authors": [
+    "Linstar"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/particlex/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "me.linstar.particlex.client.ParticleXClient"
+    ],
+    "main": [
+      "me.linstar.particlex.ParticleX"
+    ]
+  },
+  "mixins": [
+    "particlex.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.10",
+    "fabric": "*",
+    "minecraft": ">=1.20"
+  }
+}
