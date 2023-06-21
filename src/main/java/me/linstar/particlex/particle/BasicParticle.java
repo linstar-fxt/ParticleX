@@ -261,8 +261,20 @@ public class BasicParticle extends SpriteBillboardParticle {
 
     @Override
     public ParticleTextureSheet getType() {
-
-        return modify.RENDER_TYPE;
+        switch (modify.RENDER_TYPE) {
+            case 0 -> {
+                return ParticleTextureSheet.PARTICLE_SHEET_OPAQUE;
+            }
+            case 1 -> {
+                return ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT;
+            }
+            case 2 -> {
+                return ParticleTextureSheet.PARTICLE_SHEET_LIT;
+            }
+            default -> {
+                return ParticleTextureSheet.NO_RENDER;
+            }
+        }
     }
 
     @Environment(EnvType.CLIENT)
