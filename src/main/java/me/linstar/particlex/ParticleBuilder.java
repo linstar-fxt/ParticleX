@@ -23,7 +23,7 @@ public class ParticleBuilder {
         return this;
     }
 
-    public ParticleBuilder render_type(ParticleTextureSheet type){
+    public ParticleBuilder render_type(int type){
         modify.RENDER_TYPE = type;
         return this;
     }
