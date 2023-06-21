@@ -5,7 +5,7 @@ import me.linstar.particlex.command.ParticleXCommand;
 import me.linstar.particlex.until.CustomParticleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.client.particle.ParticleTextureSheet;
+import me.linstar.particlex.until.ParticleTextureSheet;
 
 public class ParticleX implements ModInitializer {
 
